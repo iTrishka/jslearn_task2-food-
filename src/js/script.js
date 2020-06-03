@@ -228,7 +228,6 @@ forms1.forEach(item => {
 
 function postData(form) {
     form.addEventListener('submit', (e) =>{
-        console.log('Кнопка нажата');
         e.preventDefault();
 
         let statusMessage = document.createElement('img');
@@ -238,13 +237,6 @@ function postData(form) {
             margin: 0 auto
         `;
         form.insertAdjacentElement('afterend', statusMessage);
-        // statusMessage.classList.add('status');
-        // statusMessage.textContent = message.loading;
-        // form.append(statusMessage);
-
-        const req = new XMLHttpRequest();
-        req.open("POST", "js/server.php");
-        req.setRequestHeader("Content-type", "application/json");
 
         const formData = new FormData(form);
         const object = {};
@@ -255,19 +247,24 @@ function postData(form) {
 
         const json = JSON.stringify(object);
 
-        req.send(json);
-        req.addEventListener('load', () => {
-            if(req.status == 200){
-                console.log(req.response);
-                showThanksModal(message.sucsess);
-                statusMessage.remove();
-                form.reset();
-                // statusMessage.textContent = message.sucsess;
-                // form.reset();
-                // setTimeout(() => statusMessage.remove(), 2000);
-            }else 
-            { showThanksModal(message.failure);
-            }
+        fetch("js/server.php", {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify(object)
+        })
+        .then(data => data.text())
+        .then(data => {
+            console.log(data);
+            showThanksModal(message.sucsess);
+            statusMessage.remove();
+        })
+        .catch(()=>{
+            showThanksModal(message.failure)
+        })
+        .finally(() => {
+            form.reset();
         });
     });      
 }
