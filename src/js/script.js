@@ -1,4 +1,4 @@
-'use strict';
+// 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -72,10 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setClock(selector, endTime){
         const timer = document.querySelector(selector),
-              days = document.querySelector('#days'),
-              hours = document.querySelector('#hours'),
-              minutes = document.querySelector('#minutes'),
-              seconds = document.querySelector('#seconds'), 
+              days = timer.querySelector('#days'),
+              hours = timer.querySelector('#hours'),
+              minutes = timer.querySelector('#minutes'),
+              seconds = timer.querySelector('#seconds'), 
               timeInterval = setInterval(updateClock, 1000);
 
         updateClock();
@@ -87,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
             hours.innerHTML = addZero(t.hours);
             minutes.innerHTML = addZero(t.minutes);
             seconds.innerHTML = addZero(t.seconds);
+
 
             if(t.total <= 0){
                 clearInterval(timeInterval);
@@ -101,42 +102,42 @@ document.addEventListener('DOMContentLoaded', () => {
     //Modal
 
     const modalTriger = document.querySelectorAll('[data-modal]'),
-          closeTriger = document.querySelector('[data-close]'),
           popupContainer = document.querySelector(".modal");
-
-
-    function openPopup(){
-        popupContainer.classList.add('show');
-        popupContainer.classList.remove('hide');
-        document.body.style.overflow = '';
-        // clearInterval(modalTimerId);
-    }
           
+
     modalTriger.forEach((item) => {
         item.addEventListener('click', openPopup);
     });
 
+    function openPopup(){
+        popupContainer.classList.add('show');
+        popupContainer.classList.remove('hide');
+        document.body.style.overflow = 'hidden';
+        clearInterval(modalTimerId);
+    }
+          
+
     function closePopup(){
-        popupContainer.classList.remove('show');
         popupContainer.classList.add('hide');
+        popupContainer.classList.remove('show');
         document.body.style.overflow = '';
     }
 
 
     popupContainer.addEventListener('click', (e) =>{
-        e.preventDefault();
-        if(e.target == closeTriger || e.target ===  popupContainer){
+        // e.preventDefault();
+        if(e.target.getAttribute('data-close') == "" || e.target ===  popupContainer){
             closePopup();
         }
     }); 
     
     document.addEventListener('keydown', (e) => {
-        if(e.code === "Escape"|| popupContainer.classList.contains('show')){
+        if(e.code === "Escape" && popupContainer.classList.contains('show')){
             closePopup();
         }
     });
 
-    // const modalTimerId = setTimeout(openPopup, 3000);
+    const modalTimerId = setTimeout(openPopup, 300000);
 
     function showModalByScroll() {
         if( window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight){
@@ -212,30 +213,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
 //  отправка запрсоов
 
-const forms = document.querySelectorAll("form");
+const forms1 = document.querySelectorAll("form");
 
 const message = {
-    loading: "Загрузка",
+    loading: "img/form/spinner.svg",
     sucsess: "Спасибо! В ближайшее время мы вам перезвоним!",
     failure: "Что-то пошло не так"
 };
 
-forms.forEach(item => {
+forms1.forEach(item => {
     postData(item);
+    console.log(item);
 });
 
 function postData(form) {
     form.addEventListener('submit', (e) =>{
+        console.log('Кнопка нажата');
         e.preventDefault();
 
-        const statusMessage = document.createElement('div');
-        statusMessage.classList.add('status');
-        statusMessage.textContent = message.loading;
-        form.append(statusMessage);
+        let statusMessage = document.createElement('img');
+        statusMessage.src = message.loading;
+        statusMessage.style.cssText = `
+            display: block;
+            margin: 0 auto
+        `;
+        form.insertAdjacentElement('afterend', statusMessage);
+        // statusMessage.classList.add('status');
+        // statusMessage.textContent = message.loading;
+        // form.append(statusMessage);
 
         const req = new XMLHttpRequest();
         req.open("POST", "js/server.php");
-        req.setRequestHeader("Content-type", "application/JSON");
+        req.setRequestHeader("Content-type", "application/json");
 
         const formData = new FormData(form);
         const object = {};
@@ -249,24 +258,42 @@ function postData(form) {
         req.send(json);
         req.addEventListener('load', () => {
             if(req.status == 200){
-                statusMessage.textContent = message.sucsess;
+                console.log(req.response);
+                showThanksModal(message.sucsess);
+                statusMessage.remove();
                 form.reset();
-                setTimeout(() => statusMessage.remove(), 2000);
+                // statusMessage.textContent = message.sucsess;
+                // form.reset();
+                // setTimeout(() => statusMessage.remove(), 2000);
             }else 
-            { statusMessage.textContent = message.failure;}
-
-
+            { showThanksModal(message.failure);
+            }
         });
-        
-
-
-    });  
-    
-
+    });      
 }
 
+function showThanksModal(message){
+    const prevModalDialog = document.querySelector('.modal__dialog');
+   
+    prevModalDialog.classList.add('hide');
+    openPopup();
 
+    const thanksModal = document.createElement('div');
+    thanksModal.classList.add('modal__dialog');
+    thanksModal.innerHTML = `
+        <div class="modal__content">
+        <div class="modal__close" data-close></div>
+        <div class="modal__title">${message}</div>
+        </div>
+    `;
+    document.querySelector(".modal").append(thanksModal);
 
-
+    setTimeout(() => {
+        thanksModal.remove();
+        prevModalDialog.classList.add('show');
+        prevModalDialog.classList.remove('hide');
+        closePopup();
+    }, 4000);
+}
 
 });
