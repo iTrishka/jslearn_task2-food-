@@ -318,7 +318,16 @@ document.addEventListener('DOMContentLoaded', () => {
         slide.style.width = widthSlide;
     });
 
-    sliderRight.addEventListener('click', () => {
+
+    function addZeroSlider(){
+        if (sliderImgs.length < 10) {
+            currentNumSlider.textContent =  `0${slideIndex}`;
+        } else {
+            currentNumSlider.textContent =  slideIndex;
+        }
+    }
+    
+      sliderRight.addEventListener('click', () => {
         if(offset == (+widthSlide.slice(0, widthSlide.length-2)*(sliderImgs.length-1))){
             offset = 0;
         } else {
@@ -333,11 +342,8 @@ document.addEventListener('DOMContentLoaded', () => {
             slideIndex++;
         }
 
-        if (sliderImgs.length < 10) {
-            currentNumSlider.textContent =  `0${slideIndex}`;
-        } else {
-            currentNumSlider.textContent =  slideIndex;
-        }
+        addZeroSlider();        
+        pickDotSlider();
 
     });
 
@@ -356,102 +362,88 @@ document.addEventListener('DOMContentLoaded', () => {
             slideIndex--;
         }
 
-        if (sliderImgs.length < 10) {
-            currentNumSlider.textContent =  `0${slideIndex}`;
-        } else {
-            currentNumSlider.textContent =  slideIndex;
-        }
+        addZeroSlider();
+        pickDotSlider();
 
     });
+
+
+    //навигация для слайдера
+
+    slidesWrapper.style.position = "relative";
+
+    const navSliderBox = document.createElement('div');
+    navSliderBox.classList.add('carousel-indicators');
+    navSliderBox.style.cssText = `position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 15;
+    display: flex;
+    justify-content: center;
+    margin-right: 15%;
+    margin-left: 15%;
+    list-style: none;
+    `;
+
+    // navSliderBox.innerHTML = `<div class = "carousel-indicators"></div>`;
+    slidesWrapper.append(navSliderBox);
+
+
+    for(let i = 0; i < sliderImgs.length; i++){
+        const dotSlider = document.createElement('div');
+        dotSlider.setAttribute('data-slide-to', i+1);
+        dotSlider.style.cssText = `box-sizing: content-box;
+        flex: 0 1 auto;
+        width: 30px;
+        height: 6px;
+        margin-right: 3px;
+        margin-left: 3px;
+        cursor: pointer;
+        background-color: #fff;
+        background-clip: padding-box;
+        border-top: 10px solid transparent;
+        border-bottom: 10px solid transparent;
+        opacity: .5;
+        transition: opacity .6s ease;
+        `;
+         navSliderBox.append(dotSlider);
+    }
+
+    const dotSliders = document.querySelectorAll("[data-slide-to]");
+    pickDotSlider();
+    console.log(dotSliders);
+
+
+    function pickDotSlider(){
+        dotSliders.forEach((dot, i) => {
+            if(i == slideIndex-1){
+                dot.style.opacity = '70';
+            } else {
+                dot.style.opacity = '.5';
+            }
+        });
+    }
+
+    dotSliders.forEach(dot =>{
+        dot.addEventListener('click', (e) =>{
+            const slideTo = e.target.getAttribute('data-slide-to');
+
+            slideIndex = slideTo;
+
+            offset = +widthSlide.slice(0, widthSlide.length-2)*(slideTo-1);
+            
+            slidesField.style.transform = `translateX(-${offset}px)`;
+
+            addZeroSlider();
+            pickDotSlider();
+        });
+    });
+
+
+
+
+
     
-
-
-    //обычный слайдер
-
-    // let slideIndex = 1;
-
-    // showCurrentSlider(slideIndex);
-
-    // if (sliderImgs.length < 10) {
-    //     totalNumSlider.textContent =  `0${sliderImgs.length}`;
-    // } else {
-    //     totalNumSlider.textContent =  sliderImgs.length;
-    // }
-
-
-    // function showCurrentSlider(n) {
-    //     if(n > sliderImgs.length){slideIndex = 1;}
-
-    //     if (n < 1){ slideIndex = sliderImgs.length; }
-
-    //     sliderImgs.forEach((item, i) => {
-    //             if(i == slideIndex -1){
-    //             item.classList.add('show');
-    //             item.classList.remove('hide');
-    //             } else {
-    //                 item.classList.remove('show');
-    //                 item.classList.add('hide');
-    //             }
-    //         });
-
-    //     if (sliderImgs.length < 10) {
-    //         currentNumSlider.textContent =  `0${slideIndex}`;
-    //     } else {
-    //         currentNumSlider.textContent =  slideIndex;
-    //     }
-    // }
-
-    // function changeSlider(i){
-    //     showCurrentSlider(slideIndex += i);
-    // }
-
-    
-    // sliderRight.addEventListener('click', () =>{
-    //     changeSlider(1);
-    //     });
-    // sliderLeft.addEventListener('click', () =>{
-    //     changeSlider(-1);
-    //     });
-         
-    //мой первый вариант слайдера
-
-    // let index = 0;
-    // document.querySelector('#total').textContent = "0" + totalNumSlider;
-
-    // function showCurrentSlider(){
-    //     sliderImgs.forEach((item, i) => {
-    //     if(i == index){
-    //     item.classList.add('show');
-    //     item.classList.remove('hide');
-    //     currentNumSlider.textContent = '0'+ (index+1);
-    //     } else {
-    //         item.classList.remove('show');
-    //         item.classList.add('hide');
-    //     }
-    //     });
-    // }
-
-    // showCurrentSlider();
-
-    
-
-    // sliderRight.addEventListener('click', () => {
-    //     console.log(index);
-    //     index += 1;
-    //     if(index > totalNumSlider-1){
-    //         index = 0;
-    //     }
-    //     showCurrentSlider();
-    // });
-
-    // sliderLeft.addEventListener('click', () => {
-    //     console.log(index);
-    //     index -= 1;
-    //     if(index < 0){
-    //         index = totalNumSlider-1;
-    //     }
-    //     showCurrentSlider();
-    // });
-
 
 });
